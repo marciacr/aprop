@@ -1,20 +1,23 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <time.h>
 #include <omp.h>
 
 /**
  * Matrix multiplication 
  **/
-#define N 10
-#define BS 5
+#define N 1024
+#define BS 32
 #define MIN_RAND 0
 #define MAX_RAND 100
+#define N_THREADS 4
+
+FILE *myFile;
 
 int M[N][N];
 int original_M[N][N];
 int correct_M[N][N];
-
 
 void fill(int* matrix, int height,int width);
 void print(int* matrix,int height,int width);
@@ -64,48 +67,61 @@ void par()
     }    
 }
 
-
 int main(int argc, char *argv[])
 {
-    if(N % BS != 0){
-        fprintf(stderr,"[ERROR] N is not multiple of BS: %d %% %d = %d\n", N,BS,N%BS);
-        exit(1);
+    myFile = fopen("ex5.csv", "w");
+    fprintf(myFile, "matrix size | BS size | n threads| seq_time(s)| par_time(s)\n");
+    fclose(myFile);
+    
+    myFile = fopen("ex5.csv", "a");
+
+    for(int i=0; i<22;i++){
+        if(N % BS != 0){
+            fprintf(stderr,"[ERROR] N is not multiple of BS: %d %% %d = %d\n", N,BS,N%BS);
+            exit(1);
+        }
+        srand(time(NULL));
+
+        //Fill A and B with random ints
+        fill((int *)original_M,N,N);
+        copy_to_M();
+
+        //Run sequential version to compare time 
+        //and also to have the correct result
+        double begin = omp_get_wtime();
+        seq();
+        double end = omp_get_wtime();
+        double sequential_time = end - begin;
+
+        //save correct result in global variable 'correct_M'
+        setup_correct_M();
+        // reset matrix
+        copy_to_M();
+
+        //parallel code
+        omp_set_num_threads(N_THREADS);
+
+        begin = omp_get_wtime();
+        #pragma omp parallel
+        #pragma omp single
+        {
+            par();
+        }
+        end = omp_get_wtime();
+        //print((int*)M,N,N);
+        double parallel_time = end - begin;
+
+        //compare your result invoking the following code (just uncomment the code):
+        assert(M,correct_M);
+
+        printf("\n- ==== Performance ==== -\n");
+        printf("Sequential time: %fs\n",sequential_time);
+        printf("Parallel   time: %fs\n",parallel_time);
+        
+        fprintf(myFile, "%dx%d, %dx%d, %d, %f, %f \n", N, N, BS, BS, N_THREADS, sequential_time, parallel_time);
     }
-    srand(time(NULL));
-
-    //Fill A and B with random ints
-    fill((int *)original_M,N,N);
-    copy_to_M();
-
-    //Run sequential version to compare time 
-    //and also to have the correct result
-    double begin = omp_get_wtime();
-    seq();
-    double end = omp_get_wtime();
-    double sequential_time = end - begin;
-
-     //save correct result in global variable 'correct_M'
-    setup_correct_M();
-    // reset matrix
-    copy_to_M();
-
-    //parallel code
-    begin = omp_get_wtime();
-    #pragma omp parallel num_threads(4)
-    #pragma omp single
-    {
-        par();
-    }
-    end = omp_get_wtime();
-    print((int*)M,N,N);
-    double parallel_time = end - begin;
-
-    //compare your result invoking the following code (just uncomment the code):
-    assert(M,correct_M);
-
-    printf("\n- ==== Performance ==== -\n");
-    printf("Sequential time: %fs\n",sequential_time);
-    printf("Parallel   time: %fs\n",parallel_time);
+    fclose(myFile);
+    
 }
 
 void copy_to_M(){
