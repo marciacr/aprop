@@ -16,4 +16,4 @@ Ex6
 
 > $ make
 
-> $ .run.sh
+> $ ./run.sh
