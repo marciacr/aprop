@@ -95,7 +95,7 @@ void cholesky_blocked_task_wait(const int ts, const int nt, double* Ah[nt][nt])
             gemm (Ah[k][i], Ah[k][j], Ah[j][i], ts, ts);
             //matrix multiplication
          }
-         #pragma omp task depend(inout: Ah[i][i]) depend(in: Ah[k][i])
+         #pragma omp task
          syrk (Ah[k][i], Ah[i][i], ts, ts);
          //symmetric rank update
       }
