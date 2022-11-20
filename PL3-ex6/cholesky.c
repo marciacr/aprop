@@ -330,7 +330,7 @@ int main(int argc, char* argv[])
    file = fopen(file_name , "a");
 
    //fprintf(file,"n,ts,num_threads,seq_time,seq_performance\n", );
-   fprintf(file,"%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f\n", n,ts, num_threads, seq_time, seq_gflops, par_for_time, par_for_gflops, par_task_wait, par_for_gflops_task_wait, par_task_time, par_for_gflops_task);
+   fprintf(file,"%d,%d,%d,%f,%f,%f,%f,%f,%f,%f,%f\n", n,ts, num_threads, seq_time*1000, seq_gflops, par_for_time*1000, par_for_gflops, par_task_wait*1000, par_for_gflops_task_wait, par_task_time*1000, par_for_gflops_task);
 
    fclose(file);
 

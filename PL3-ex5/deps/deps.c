@@ -11,7 +11,7 @@
 #define BS 32
 #define MIN_RAND 0
 #define MAX_RAND 100
-#define N_THREADS 4
+#define N_THREADS 12
 
 FILE *myFile;
 
@@ -69,13 +69,10 @@ void par()
 
 int main(int argc, char *argv[])
 {
-    myFile = fopen("ex5.csv", "w");
-    fprintf(myFile, "matrix size | BS size | n threads| seq_time(s)| par_time(s)\n");
-    fclose(myFile);
-    
+      
     myFile = fopen("ex5.csv", "a");
 
-    for(int i=0; i<22;i++){
+    for(int i=0; i<5;i++){
         if(N % BS != 0){
             fprintf(stderr,"[ERROR] N is not multiple of BS: %d %% %d = %d\n", N,BS,N%BS);
             exit(1);
