@@ -8,7 +8,7 @@
 
 ## **Report**
 
-The group analysis of the exercises is found in the file **report_aprop.pdf**.
+The group analysis of the exercises can be found in the file **report_aprop.pdf**.
 
 ## **Setup**
 
