@@ -1,5 +1,5 @@
-# APROP LAB
 
+<<<<<<< HEAD
 **Students:**
 
   Gleizielly Alves (1210133)
@@ -17,3 +17,5 @@ Ex6
 > $ make
 
 > $ ./run.sh
+=======
+>>>>>>> b935ffac41b59d3c9991da76030790d811ae4b27
