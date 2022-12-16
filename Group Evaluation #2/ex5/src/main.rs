@@ -30,6 +30,8 @@ use std::error::Error;
 use csv::Writer;
 use csv::WriterBuilder;
 
+use rayon::ThreadPoolBuilder;
+
 #[derive(Serialize)]
 struct Row{
 
@@ -51,7 +53,8 @@ struct Row{
   const EPS: f64  = 1.0e-5;
   
   fn main() {
- 
+    
+    //ThreadPoolBuilder::new().num_threads(8).build_global().unwrap();
        /* Sequential */
       println!("Mandelbrot! Sequential...");
       let start = Instant::now();
@@ -143,13 +146,12 @@ struct Row{
          });
      }
  
-     thread::sleep(time::Duration::from_secs(1));
+     //thread::sleep(time::Duration::from_secs(1));
      //println!("There are currently {:?} worker threads active in the pool", pool.active_count());
      pool.join();
  
      let result = rx.iter().take(n_jobs as usize).fold(0, |a, b| a + b);
      //println!("Result: {}",result);
- 
  
      return result;
  
@@ -176,6 +178,7 @@ struct Row{
 
     let file = OpenOptions::new()
     .write(true)
+    .create(true)
     .append(true)
     .open("dados.csv")
     .unwrap();
