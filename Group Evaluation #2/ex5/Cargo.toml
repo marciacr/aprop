@@ -6,3 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+rayon = "1.6.1"
+threadpool = "1.8.1"
+serde = { version = "1.0.150", features = ["derive"] }
+csv = "1.1.6"

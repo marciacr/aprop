@@ -23,6 +23,22 @@
  use std::thread;
  use std::time;
  use threadpool::ThreadPool;
+
+use std::fs::OpenOptions;
+use serde::Serialize;
+use std::error::Error;
+use csv::Writer;
+use csv::WriterBuilder;
+
+#[derive(Serialize)]
+struct Row{
+
+    time_seq : f64,
+    time_tp : f64,
+    time_ray : f64,
+
+}
+
  
   #[derive(Copy, Clone)]
   struct Complex{
@@ -42,6 +58,7 @@
       let num_outside_seq = get_num_points_outside_seq();
       let end = start.elapsed();
       println!("Time elapsed in sequential: {:?}", end);
+      let t_seq = end;
  
       /* Threadpool */
       println!("Mandelbrot! Parallel using Threadpool...");
@@ -49,6 +66,7 @@
       let num_outside_par_tp = get_num_points_outside_par_pool();
       let end = start.elapsed();
       println!("Time elapsed in parallel Threadpool: {:?}", end);
+      let t_tp = end;
       
       assert!(num_outside_par_tp == num_outside_seq, "Expected num_outside to be equal: seq = {num_outside_seq}; par_threadpool = {num_outside_par_tp}");
  
@@ -58,6 +76,7 @@
       let num_outside_par_rayon = get_num_points_outside_par_rayon();
       let end = start.elapsed();
       println!("Time elapsed in parallel Rayon: {:?}", end);
+      let t_ray = end;
       
       assert!(num_outside_par_rayon == num_outside_seq, "Expected num_outside to be equal: seq = {num_outside_seq}; par_rayon = {num_outside_par_rayon}");
   
@@ -67,6 +86,14 @@
       let error=area/NPOINTS as f64;
       println!("Area of Mandlebrot set = {:12.8} +/- {:12.8}\n",area,error);
   
+    /*Write  */
+    let row = Row{
+        time_seq : t_seq.as_secs_f64(),
+        time_tp : t_tp.as_secs_f64(),
+        time_ray : t_ray.as_secs_f64(),
+
+    };
+    csv_write(row);
   }
   
   fn get_num_points_outside_seq() -> i32 {
@@ -90,11 +117,11 @@
   }
   
   fn get_num_points_outside_par_pool() -> i32 {
-      let n_workers = thread::available_parallelism().unwrap().get();
+     let n_workers = thread::available_parallelism().unwrap().get();
      let n_jobs = 100;
      let pool = ThreadPool::new(n_workers);
  
-     println!("Created a thread pool with {:?} worker threads ", pool.max_count());
+     //println!("Created a thread pool with {:?} worker threads ", pool.max_count());
  
      let (tx, rx) = channel();
  
@@ -117,7 +144,7 @@
      }
  
      thread::sleep(time::Duration::from_secs(1));
-     println!("There are currently {:?} worker threads active in the pool", pool.active_count());
+     //println!("There are currently {:?} worker threads active in the pool", pool.active_count());
      pool.join();
  
      let result = rx.iter().take(n_jobs as usize).fold(0, |a, b| a + b);
@@ -128,7 +155,6 @@
  
  }
  
-  
   fn test_point(i: u32, j: u32) -> i32 {
       let c = Complex{
           r: -2.0+2.5*(i as f64)/(NPOINTS as f64)+EPS,
@@ -145,3 +171,16 @@
       }).map_or(0, |_| 1)
  
   }
+
+  fn csv_write(row: Row) -> Result<(), Box<dyn Error>> {
+
+    let file = OpenOptions::new()
+    .write(true)
+    .append(true)
+    .open("dados.csv")
+    .unwrap();
+    let mut wtr =WriterBuilder::new().has_headers(false).from_writer(file);
+    wtr.serialize(&row)?;
+    wtr.flush()?;
+    Ok(())
+}
