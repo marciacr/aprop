@@ -8,7 +8,7 @@
 
 ## **Report**
 
-The group analysis of the exercises can be found in the file **_report_APROP.pdf_**.
+The group analysis of the exercises can be found in the file [**_report_APROP.pdf_**](https://github.com/marciacr/aprop/blob/main/Group%20Evaluation%20%231/report_APROP.pdf).
 
 ## **Setup**
 
